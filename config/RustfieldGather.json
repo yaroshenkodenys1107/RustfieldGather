@@ -1,0 +1,395 @@
+{
+  "Hittable": {
+    "stone-nodes": {
+      "enable": true,
+      "hits": 4,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "stones",
+          "amount": 10000
+        }
+      ]
+    },
+    "metal-nodes": {
+      "enable": true,
+      "hits": 4,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "metal.fragments",
+          "amount": 5000
+        },
+        {
+          "shortname": "metal.refined",
+          "amount": 200
+        }
+      ]
+    },
+    "sulfur-nodes": {
+      "enable": true,
+      "hits": 4,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "gunpowder",
+          "amount": 2500
+        },
+        {
+          "shortname": "sulfur",
+          "amount": 1000
+        }
+      ]
+    },
+    "hqm-nodes": {
+      "enable": true,
+      "hits": 4,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "metal.refined",
+          "amount": 800
+        },
+        {
+          "shortname": "metal.fragments",
+          "amount": 5000
+        }
+      ]
+    },
+    "trees": {
+      "enable": true,
+      "hits": 4,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 50000
+        }
+      ]
+    },
+    "dead-logs": {
+      "enable": true,
+      "hits": 3,
+      "mode": "per hit",
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 5000
+        }
+      ]
+    },
+    "driftwood": {
+      "enable": true,
+      "hits": 2,
+      "mode": "per hit",
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 100000
+        }
+      ]
+    },
+    "wood-pile": {
+      "enable": true,
+      "hits": 3,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 75000
+        }
+      ]
+    },
+    "cactus": {
+      "enable": true,
+      "hits": 1,
+      "mode": "total",
+      "rewards": [
+        {
+          "shortname": "cloth",
+          "amount": 5000
+        },
+        {
+          "shortname": "largemedkit",
+          "amount": 25
+        }
+      ]
+    }
+  },
+  "Collectible": {
+    "hemp-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "lowgradefuel",
+          "amount": 1000
+        },
+        {
+          "shortname": "cloth",
+          "amount": 1000
+        }
+      ]
+    },
+    "wood-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 15000
+        }
+      ]
+    },
+    "stone-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "stones",
+          "amount": 5000
+        }
+      ]
+    },
+    "metal-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "metal.fragments",
+          "amount": 3000
+        }
+      ]
+    },
+    "sulfur-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "sulfur",
+          "amount": 500
+        },
+        {
+          "shortname": "gunpowder",
+          "amount": 1500
+        }
+      ]
+    },
+    "hqm-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "metal.refined",
+          "amount": 150
+        }
+      ]
+    },
+    "mushrooms": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "mushroom",
+          "amount": 25
+        }
+      ]
+    },
+    "diesel_collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "diesel_barrel",
+          "amount": 1
+        },
+        {
+          "shortname": "lowgradefuel",
+          "amount": 10000
+        }
+      ]
+    },
+    "coconut-spawn": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "coconut",
+          "amount": 25
+        }
+      ]
+    },
+    "corn-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "corn",
+          "amount": 25
+        }
+      ]
+    },
+    "potato-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "potato",
+          "amount": 25
+        }
+      ]
+    },
+    "pumpkin-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "pumpkin",
+          "amount": 25
+        }
+      ]
+    },
+    "wheat-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "wheat",
+          "amount": 25
+        }
+      ]
+    },
+    "sunflower-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "sunflower",
+          "amount": 25
+        }
+      ]
+    },
+    "orchid-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "orchid",
+          "amount": 25
+        }
+      ]
+    },
+    "rose-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "rose",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-black-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "black.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-blue-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "blue.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-green-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "green.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-red-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "red.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-white-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "white.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "berry-yellow-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "yellow.berry",
+          "amount": 25
+        }
+      ]
+    },
+    "halloween-bone-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "bone.fragments",
+          "amount": 1000
+        }
+      ]
+    },
+    "halloween-metal-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "metal.ore",
+          "amount": 2500
+        }
+      ]
+    },
+    "halloween-stone-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "stones",
+          "amount": 5000
+        }
+      ]
+    },
+    "halloween-sulfur-collectible": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "sulfur",
+          "amount": 500
+        },
+        {
+          "shortname": "gunpowder",
+          "amount": 1500
+        }
+      ]
+    },
+    "halloween-wood-collectable": {
+      "enable": true,
+      "rewards": [
+        {
+          "shortname": "wood",
+          "amount": 10000
+        }
+      ]
+    }
+  },
+  "Corpses": {
+    "enable": true,
+    "hits": 1,
+    "mode": "per hit",
+    "rewards": [
+      {
+        "shortname": "largemedkit",
+        "amount": 25
+      }
+    ]
+  },
+  "Barrels": {
+    "enable": true,
+    "mode": 0
+  }
+}
