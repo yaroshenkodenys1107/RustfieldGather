@@ -12,7 +12,7 @@ at a sensible pace.
 The hit itself is never cancelled, so the sparks, the sound, the animation and the tool wear all stay
 exactly as the game plays them. Only the payout and the moment of death are ours.
 
-Author: **Denys Yaroshenko** · Rust (Carbon / Oxide) · **v1.1.0**
+Author: **Denys Yaroshenko** · Rust (Carbon / Oxide) · **v1.2.0**
 
 > **Beta.** Runs on a live public server. Config keys may still be renamed between minor versions;
 > every rename is listed in the changelog.
@@ -25,7 +25,7 @@ Author: **Denys Yaroshenko** · Rust (Carbon / Oxide) · **v1.1.0**
 |---|---|---|
 | **Hittable** | ore nodes, trees, dead logs, driftwood, wood piles, cacti | A fixed number of hits and a fixed payout per section. The visible break stages of the model are spread over those hits. |
 | **Collectible** | hemp, ore/wood/stone pickups, diesel barrels, mushrooms, berries, crops | A fixed payout on pickup. The whole pickup is taken over, so no stray vanilla item comes with it. |
-| **Corpses** | animal and player corpses | A fixed number of hits and a fixed payout, same rules as Hittable. |
+| **Corpses** | players and NPCs, animals — two separate rules | A fixed number of hits and a fixed payout, same rules as Hittable. |
 | **Barrels** | loot and oil barrels | The contents go straight into the inventory and the barrel gibs. Melee-only or any damage. |
 
 ---
@@ -38,21 +38,20 @@ Author: **Denys Yaroshenko** · Rust (Carbon / Oxide) · **v1.1.0**
 ## Installation
 
 1. Drop `RustfieldGather.cs` into `carbon/plugins/`.
-2. On first load the plugin writes `carbon/configs/RustfieldGather.json` with a small demo config.
-   **Nothing is active until you fill it in** — every section carries its own `enable` flag.
-3. Fill the config in-game with `/gather`, or edit the file and run `rustfieldgather.reload`.
-4. Only then unload whatever gathering plugin you are replacing. An enabled section takes over an
-   object completely; a disabled one leaves it entirely vanilla, so the two can be swapped over one
-   section at a time.
+2. On first load the plugin writes `carbon/configs/RustfieldGather.json` from its built-in
+   defaults — the Rustfield x1000000 configuration, **every section enabled**. An existing file is
+   never replaced by the defaults.
+3. Tune it in-game with `/gather`, or edit the file and run `rustfieldgather.reload`.
+4. If another gathering plugin is loaded, unload it. Every section carries its own `enable` flag: an
+   enabled section takes over an object completely, a disabled one leaves it entirely vanilla.
 
-`config/RustfieldGather.json` in this repository is the live configuration of a x1000 server, kept
-here as a reference for the shape of the file, not as a recommended set of numbers.
+`config/RustfieldGather.json` in this repository is exactly the file those defaults produce.
 
 ---
 
 ## The three payout modes
 
-Every Hittable section — and the Corpses section — carries a `mode`. It decides what the numbers in
+Every Hittable section — and both corpse sections — carries a `mode`. It decides what the numbers in
 `rewards` actually mean:
 
 | `mode` | `hits` | What one object pays |
@@ -149,7 +148,8 @@ its current config produces, so a hit count can be checked without going outside
       ]
     }
   },
-  "Corpses": { "enable": true, "hits": 1, "mode": "per hit", "rewards": [ … ] },
+  "HumanCorpses":  { "enable": true, "hits": 1, "mode": "per hit", "rewards": [ … ] },
+  "AnimalCorpses": { "enable": true, "hits": 1, "mode": "per hit", "rewards": [ … ] },
   "Barrels": { "enable": true, "mode": 0 }
 }
 ```
@@ -174,6 +174,25 @@ group covers all of them and they cannot be given separate rules.
 Prefab names (`hemp-collectable`, `wood-collectable`, `diesel_collectable`, …). Collectibles have no
 hit count. Eating a pickup is left alone: it is a deliberate act on the vanilla contents.
 
+### Corpses
+
+`HumanCorpses` covers players and every NPC, `AnimalCorpses` every animal. The split follows the
+game's own classes, so there is no prefab list: a human-shaped body carries an inventory and leaves a
+lootable corpse, an animal leaves a plain one. The horse is the one lootable animal — its saddlebags —
+and is counted as an animal.
+
+| Rule | Corpse prefabs |
+|---|---|
+| `HumanCorpses` | `player_corpse`, `player_corpse_new`, `scientist_corpse`, `scientist2.corpse`, `scientist2.heavy.corpse`, `murderer_corpse`, `gingerbread_corpse_male`, `gingerbread_corpse_female`, `frankensteinpet_corpse` |
+| `AnimalCorpses` | `bear`, `polarbear`, `boar`, `chicken`, `stag`, `wolf`, `horse`, `crocodile`, `panther`, `tiger`, `shark`, `snake` (plus the tutorial bear and chicken) |
+
+`rustfieldgather.audit` prints the current split straight from the game, so a new corpse added by a
+Rust update shows up there with its side. Only the butchering is replaced — what the corpse carries in
+its inventory is untouched.
+
+A config written before v1.2.0 has a single `Corpses` section. It is copied into both new sections on
+load and the old key is dropped from the file.
+
 ### Barrels
 
 `mode` `0` breaks a barrel on melee only, `1` on any damage including bullets. The barrel's own loot
@@ -191,8 +210,8 @@ is what lands in the inventory — there is no reward list to override it with.
 
 ## The in-game editor
 
-`/gather` opens a panel with four tabs — NODES, COLLECT, CORPSES, BARRELS. Pick a section on the
-left, and the card on the right holds its enable switch, its hit count, the three mode buttons and
+`/gather` opens a panel with four tabs — NODES, COLLECT, CORPSES, BARRELS; the CORPSES tab lists
+**Players and NPCs** and **Animals**. Pick a section on the left, and the card on the right holds its enable switch, its hit count, the three mode buttons and
 its reward rows. Every change is applied and written to disk immediately; **SAVE AND APPLY** forces
 the file to disk, reads it back and lays the rules over the live objects again.
 
@@ -223,7 +242,7 @@ three of the console commands walk every entity on the map.
 | `rustfieldgather.reload` | Re-reads the config file and applies it. |
 | `rustfieldgather.list` | Every hittable kind and collectible prefab on the map, with counts. |
 | `rustfieldgather.stages` | Break-stage tables, max HP, and the hit-by-hit plan the config produces. |
-| `rustfieldgather.audit` | Cross-checks the config and the group table against what is on the map: duplicate prefabs, dead keys, uncovered objects, broken item shortnames. |
+| `rustfieldgather.audit` | Cross-checks the config and the group table against what is on the map: duplicate prefabs, dead keys, uncovered objects, broken item shortnames, and which corpse prefabs fall under which rule. |
 
 Run from the server console or RCON they need no permission; typed into F1 by a player they need
 `rustfieldgather.admin`.

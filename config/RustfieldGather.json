@@ -33,11 +33,11 @@
       "rewards": [
         {
           "shortname": "gunpowder",
-          "amount": 2500
+          "amount": 1500
         },
         {
           "shortname": "sulfur",
-          "amount": 1000
+          "amount": 500
         }
       ]
     },
@@ -58,34 +58,34 @@
     },
     "trees": {
       "enable": true,
-      "hits": 4,
+      "hits": 5,
       "mode": "total",
       "rewards": [
         {
           "shortname": "wood",
-          "amount": 50000
+          "amount": 10000
         }
       ]
     },
     "dead-logs": {
       "enable": true,
       "hits": 3,
-      "mode": "per hit",
+      "mode": "total",
       "rewards": [
         {
           "shortname": "wood",
-          "amount": 5000
+          "amount": 7500
         }
       ]
     },
     "driftwood": {
       "enable": true,
-      "hits": 2,
-      "mode": "per hit",
+      "hits": 3,
+      "mode": "total",
       "rewards": [
         {
           "shortname": "wood",
-          "amount": 100000
+          "amount": 7500
         }
       ]
     },
@@ -96,7 +96,7 @@
       "rewards": [
         {
           "shortname": "wood",
-          "amount": 75000
+          "amount": 7500
         }
       ]
     },
@@ -107,7 +107,7 @@
       "rewards": [
         {
           "shortname": "cloth",
-          "amount": 5000
+          "amount": 1000
         },
         {
           "shortname": "largemedkit",
@@ -122,11 +122,11 @@
       "rewards": [
         {
           "shortname": "lowgradefuel",
-          "amount": 1000
+          "amount": 250
         },
         {
           "shortname": "cloth",
-          "amount": 1000
+          "amount": 500
         }
       ]
     },
@@ -377,7 +377,18 @@
       ]
     }
   },
-  "Corpses": {
+  "HumanCorpses": {
+    "enable": true,
+    "hits": 1,
+    "mode": "per hit",
+    "rewards": [
+      {
+        "shortname": "largemedkit",
+        "amount": 25
+      }
+    ]
+  },
+  "AnimalCorpses": {
     "enable": true,
     "hits": 1,
     "mode": "per hit",

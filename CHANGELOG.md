@@ -7,6 +7,38 @@ Every rename is listed here under **Config**.
 
 ---
 
+## 1.2.0 — Beta
+
+**Added**
+
+- Corpses are split in two: one rule for players and every NPC, another for
+  animals. Human-shaped corpses all carry an inventory, so the split follows
+  the game's own classes: a lootable corpse is human (`player_corpse`, both
+  scientist generations — `scientist2` is a bare `LootableCorpse`, not a
+  `PlayerCorpse` — murderers, gingerbread men, Frankenstein's pet), and
+  everything else is an animal, the horse included despite its saddlebags.
+  No prefab list to keep up to date.
+- The CORPSES tab in `/gather` lists the two rules, **Players and NPCs** and
+  **Animals**, each with its own switch, hit count, mode and rewards.
+- `rustfieldgather.audit` prints every butcherable corpse prefab in the game
+  and which of the two rules it falls under.
+
+**Changed**
+
+- The built-in defaults are now the Rustfield x1000000 configuration, active
+  out of the box — 9 hittable groups, 27 collectibles, both corpse rules and
+  barrels. The old demo config, with every section switched off, is gone. An
+  existing config file still outranks the defaults, as before.
+
+**Config**
+
+- `Corpses` is replaced by `HumanCorpses` and `AnimalCorpses`, same shape.
+  A file that still has `Corpses` is migrated on load: its rule is copied into
+  both new sections, so nothing changes in game until one of them is edited,
+  and the file is rewritten once without the old key.
+
+---
+
 ## 1.1.0 — Beta
 
 **Added**

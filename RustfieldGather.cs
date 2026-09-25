@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("RustfieldGather", "Rustfield", "1.1.0")]
+    [Info("RustfieldGather", "Rustfield", "1.2.0")]
     [Description("Reworked gathering: instant / per hit / total payouts, hits laid over the break stages, instant barrels.")]
     public class RustfieldGather : RustPlugin
     {
@@ -100,38 +100,87 @@ namespace Oxide.Plugins
             [JsonProperty("Collectible", ObjectCreationHandling = ObjectCreationHandling.Replace)]
             public Dictionary<string, CollectibleEntry> Collectible = new Dictionary<string, CollectibleEntry>();
 
-            [JsonProperty("Corpses")] public HittableEntry Corpses = new HittableEntry();
+            // Players and every NPC on one side, animals (horses included) on the other.
+            [JsonProperty("HumanCorpses")] public HittableEntry HumanCorpses;
+            [JsonProperty("AnimalCorpses")] public HittableEntry AnimalCorpses;
+
             [JsonProperty("Barrels")] public BarrelEntry Barrels = new BarrelEntry();
+
+            // Up to 1.1.0 one rule served every corpse. It is only read, never written: a file
+            // that still has it hands it to both sides the first time it loads.
+            [JsonProperty("Corpses")] public HittableEntry LegacyCorpses;
+            public bool ShouldSerializeLegacyCorpses() => false;
         }
 
         private Configuration _config;
 
-        private static List<Reward> Demo(string a, int an, string b, int bn) => new List<Reward>
+        private static Reward R(string shortname, int amount) => new Reward { Shortname = shortname, Amount = amount };
+
+        private static HittableEntry Node(int hits, params Reward[] rewards) => new HittableEntry
         {
-            new Reward { Shortname = a, Amount = an },
-            new Reward { Shortname = b, Amount = bn }
+            Enable = true, Hits = hits, Mode = ModeTotal, Rewards = rewards.ToList()
         };
 
+        private static CollectibleEntry Pick(params Reward[] rewards) => new CollectibleEntry
+        {
+            Enable = true, Rewards = rewards.ToList()
+        };
+
+        private static HittableEntry DefaultCorpse() => new HittableEntry
+        {
+            Enable = true, Hits = 1, Mode = ModePerHit, Rewards = new List<Reward> { R("largemedkit", 25) }
+        };
+
+        // The Rustfield x1000000 values, tuned on the live server.
         protected override void LoadDefaultConfig()
         {
             _config = new Configuration
             {
                 Hittable = new Dictionary<string, HittableEntry>
                 {
-                    ["wood"] = new HittableEntry { Hits = 3, Rewards = Demo("wood", 1000, "sticks", 5) },
-                    ["stones"] = new HittableEntry { Hits = 3, Rewards = Demo("stones", 1000, "metal.fragments", 50) },
-                    ["metal.ore"] = new HittableEntry { Hits = 3, Rewards = Demo("metal.fragments", 1000, "metal.refined", 5) },
-                    ["sulfur.ore"] = new HittableEntry { Hits = 3, Rewards = Demo("sulfur", 1000, "gunpowder", 50) },
-                    ["hq.metal.ore"] = new HittableEntry { Hits = 3, Rewards = Demo("metal.refined", 50, "metal.fragments", 1000) },
-                    ["cloth"] = new HittableEntry { Hits = 3, Rewards = Demo("cloth", 500, "seed.hemp", 2) }
+                    ["stone-nodes"] = Node(4, R("stones", 10000)),
+                    ["metal-nodes"] = Node(4, R("metal.fragments", 5000), R("metal.refined", 200)),
+                    ["sulfur-nodes"] = Node(4, R("gunpowder", 1500), R("sulfur", 500)),
+                    ["hqm-nodes"] = Node(4, R("metal.refined", 800), R("metal.fragments", 5000)),
+                    ["trees"] = Node(5, R("wood", 10000)),
+                    ["dead-logs"] = Node(3, R("wood", 7500)),
+                    ["driftwood"] = Node(3, R("wood", 7500)),
+                    ["wood-pile"] = Node(3, R("wood", 7500)),
+                    ["cactus"] = Node(1, R("cloth", 1000), R("largemedkit", 25))
                 },
                 Collectible = new Dictionary<string, CollectibleEntry>
                 {
-                    ["hemp-collectable"] = new CollectibleEntry { Rewards = Demo("lowgradefuel", 100, "cloth", 50) },
-                    ["wood-collectable"] = new CollectibleEntry { Rewards = Demo("wood", 500, "sticks", 5) }
+                    ["hemp-collectable"] = Pick(R("lowgradefuel", 250), R("cloth", 500)),
+                    ["wood-collectable"] = Pick(R("wood", 15000)),
+                    ["stone-collectable"] = Pick(R("stones", 5000)),
+                    ["metal-collectable"] = Pick(R("metal.fragments", 3000)),
+                    ["sulfur-collectable"] = Pick(R("sulfur", 500), R("gunpowder", 1500)),
+                    ["hqm-collectable"] = Pick(R("metal.refined", 150)),
+                    ["mushrooms"] = Pick(R("mushroom", 25)),
+                    ["diesel_collectable"] = Pick(R("diesel_barrel", 1), R("lowgradefuel", 10000)),
+                    ["coconut-spawn"] = Pick(R("coconut", 25)),
+                    ["corn-collectable"] = Pick(R("corn", 25)),
+                    ["potato-collectable"] = Pick(R("potato", 25)),
+                    ["pumpkin-collectable"] = Pick(R("pumpkin", 25)),
+                    ["wheat-collectable"] = Pick(R("wheat", 25)),
+                    ["sunflower-collectable"] = Pick(R("sunflower", 25)),
+                    ["orchid-collectable"] = Pick(R("orchid", 25)),
+                    ["rose-collectable"] = Pick(R("rose", 25)),
+                    ["berry-black-collectable"] = Pick(R("black.berry", 25)),
+                    ["berry-blue-collectable"] = Pick(R("blue.berry", 25)),
+                    ["berry-green-collectable"] = Pick(R("green.berry", 25)),
+                    ["berry-red-collectable"] = Pick(R("red.berry", 25)),
+                    ["berry-white-collectable"] = Pick(R("white.berry", 25)),
+                    ["berry-yellow-collectable"] = Pick(R("yellow.berry", 25)),
+                    ["halloween-bone-collectable"] = Pick(R("bone.fragments", 1000)),
+                    ["halloween-metal-collectable"] = Pick(R("metal.ore", 2500)),
+                    ["halloween-stone-collectable"] = Pick(R("stones", 5000)),
+                    ["halloween-sulfur-collectible"] = Pick(R("sulfur", 500), R("gunpowder", 1500)),
+                    ["halloween-wood-collectable"] = Pick(R("wood", 10000))
                 },
-                Corpses = new HittableEntry { Hits = 3, Rewards = Demo("grenade.f1", 5, "bandage", 2) },
-                Barrels = new BarrelEntry { Mode = 0 }
+                HumanCorpses = DefaultCorpse(),
+                AnimalCorpses = DefaultCorpse(),
+                Barrels = new BarrelEntry { Enable = true, Mode = 0 }
             };
         }
 
@@ -142,31 +191,52 @@ namespace Oxide.Plugins
             {
                 _config = Config.ReadObject<Configuration>();
                 if (_config == null) throw new JsonException("config is empty");
-                Normalize();
+                if (Normalize())
+                {
+                    Puts("Corpse rules split into HumanCorpses and AnimalCorpses - config file updated.");
+                    SaveConfig();
+                }
             }
             catch (Exception e)
             {
                 PrintError($"Config unreadable ({e.Message}) - the plugin runs vanilla mechanics, the file was NOT overwritten.");
-                _config = new Configuration();
+                _config = new Configuration { HumanCorpses = new HittableEntry(), AnimalCorpses = new HittableEntry() };
             }
         }
 
         protected override void SaveConfig() => Config.WriteObject(_config, true);
 
         // Any section can arrive from the file as null, which would take the whole plugin down.
-        private void Normalize()
+        // True when a corpse section had to be filled in, so the file lacks what is now in memory.
+        private bool Normalize()
         {
+            bool corpsesAdded = _config.HumanCorpses == null || _config.AnimalCorpses == null;
             if (_config.Hittable == null) _config.Hittable = new Dictionary<string, HittableEntry>();
             if (_config.Collectible == null) _config.Collectible = new Dictionary<string, CollectibleEntry>();
-            if (_config.Corpses == null) _config.Corpses = new HittableEntry();
             if (_config.Barrels == null) _config.Barrels = new BarrelEntry();
+
+            var legacy = _config.LegacyCorpses;
+            _config.LegacyCorpses = null;
+            if (_config.HumanCorpses == null) _config.HumanCorpses = legacy != null ? Copy(legacy) : DefaultCorpse();
+            if (_config.AnimalCorpses == null) _config.AnimalCorpses = legacy != null ? Copy(legacy) : DefaultCorpse();
 
             foreach (var kv in _config.Hittable)
                 if (kv.Value != null && kv.Value.Rewards == null) kv.Value.Rewards = new List<Reward>();
             foreach (var kv in _config.Collectible)
                 if (kv.Value != null && kv.Value.Rewards == null) kv.Value.Rewards = new List<Reward>();
-            if (_config.Corpses.Rewards == null) _config.Corpses.Rewards = new List<Reward>();
+            if (_config.HumanCorpses.Rewards == null) _config.HumanCorpses.Rewards = new List<Reward>();
+            if (_config.AnimalCorpses.Rewards == null) _config.AnimalCorpses.Rewards = new List<Reward>();
+            return corpsesAdded;
         }
+
+        private static HittableEntry Copy(HittableEntry source) => new HittableEntry
+        {
+            Enable = source.Enable, Hits = source.Hits, Mode = source.Mode,
+            Rewards = (source.Rewards ?? new List<Reward>())
+                .Where(r => r != null)
+                .Select(r => R(r.Shortname, r.Amount))
+                .ToList()
+        };
 
         #endregion
 
@@ -306,7 +376,8 @@ namespace Oxide.Plugins
             new Dictionary<string, Rule>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, List<Portion>> _collectiblePortions =
             new Dictionary<string, List<Portion>>(StringComparer.OrdinalIgnoreCase);
-        private Rule _corpseRule;
+        private Rule _humanCorpseRule;
+        private Rule _animalCorpseRule;
         private readonly HashSet<string> _barrelPrefabs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly FieldInfo ResourceHealth =
@@ -325,7 +396,14 @@ namespace Oxide.Plugins
             typeof(BaseCombatEntity).GetField("_health",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-        private const string CorpseKind = "\u0000corpses";
+        // Anything human-shaped carries an inventory, so its corpse is lootable: players, every
+        // scientist generation (scientist2 is a bare LootableCorpse, not a PlayerCorpse), murderers,
+        // gingerbread men. Animal corpses are plain BaseCorpse, save the horse and its saddlebags.
+        private static bool IsHumanCorpse(BaseEntity corpse)
+            => corpse is LootableCorpse && !(corpse is HorseCorpse);
+
+        private Rule CorpseRule(BaseEntity corpse)
+            => IsHumanCorpse(corpse) ? _humanCorpseRule : _animalCorpseRule;
 
         // Headroom for the duration of the native hit. Vanilla ResourceDispenser.DoGather decides
         // the damage itself: it looks at what fraction of containedItems the hit consumed and deals
@@ -559,8 +637,23 @@ namespace Oxide.Plugins
             int bad = 0;
             foreach (var kv in _config.Hittable) bad += CheckRewards("Hittable/" + kv.Key, kv.Value.Rewards);
             foreach (var kv in _config.Collectible) bad += CheckRewards("Collectible/" + kv.Key, kv.Value.Rewards);
-            bad += CheckRewards("Corpses", _config.Corpses.Rewards);
+            bad += CheckRewards("HumanCorpses", _config.HumanCorpses.Rewards);
+            bad += CheckRewards("AnimalCorpses", _config.AnimalCorpses.Rewards);
             Puts(bad == 0 ? "  Every reward shortname exists." : $"  Broken rewards: {bad}");
+
+            // 7. Which side every butcherable corpse prefab in the game falls on
+            var humans = new List<string>();
+            var animals = new List<string>();
+            foreach (var path in GameManifest.Current.entities)
+            {
+                if (path.IndexOf("corpse", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                var prefab = GameManager.server.FindPrefab(path);
+                var corpse = prefab?.GetComponent<BaseCorpse>();
+                if (corpse == null || prefab.GetComponent<ResourceDispenser>() == null) continue;
+                (IsHumanCorpse(corpse) ? humans : animals).Add(corpse.ShortPrefabName);
+            }
+            Puts($"  Human corpses ({humans.Count}): {string.Join(", ", humans.OrderBy(n => n).ToArray())}");
+            Puts($"  Animal corpses ({animals.Count}): {string.Join(", ", animals.OrderBy(n => n).ToArray())}");
 
             Puts($"  Active hittable targets {_hittable.Count}, collectible {_collectiblePortions.Count}.");
             Puts("===== end of audit =====");
@@ -593,7 +686,8 @@ namespace Oxide.Plugins
             _hittable.Clear();
             _collectiblePortions.Clear();
             _barrelPrefabs.Clear();
-            _corpseRule = null;
+            _humanCorpseRule = null;
+            _animalCorpseRule = null;
 
             foreach (var kv in _config.Hittable)
             {
@@ -623,15 +717,19 @@ namespace Oxide.Plugins
                 }
             }
 
-            if (Validate("Corpses", _config.Corpses, out var corpse))
-                _corpseRule = corpse;
+            if (Validate("HumanCorpses", _config.HumanCorpses, out var human))
+                _humanCorpseRule = human;
+            if (Validate("AnimalCorpses", _config.AnimalCorpses, out var animal))
+                _animalCorpseRule = animal;
 
             if (_config.Barrels.Enable)
                 foreach (var p in BarrelPrefabs) _barrelPrefabs.Add(p);
 
             if (quiet) return;
             Puts($"Active: hittable targets {_hittable.Count}, collectible {_collectiblePortions.Count}, " +
-                 $"corpses {(_corpseRule != null ? "yes" : "no")}, barrels {(_barrelPrefabs.Count > 0 ? "mode " + _config.Barrels.Mode : "no")}.");
+                 $"human corpses {(_humanCorpseRule != null ? "yes" : "no")}, " +
+                 $"animal corpses {(_animalCorpseRule != null ? "yes" : "no")}, " +
+                 $"barrels {(_barrelPrefabs.Count > 0 ? "mode " + _config.Barrels.Mode : "no")}.");
         }
 
         private bool Validate(string key, HittableEntry entry, out Rule rule)
@@ -707,28 +805,24 @@ namespace Oxide.Plugins
             if (melee == null) return null;
 
             ResourceDispenser dispenser;
-            string kind;
             float maxHealth;
+            Rule rule;
 
             if (target is ResourceEntity resource)
             {
                 dispenser = resource.GetComponent<ResourceDispenser>();
-                kind = KindOf(dispenser);
                 maxHealth = resource.MaxHealth();
+                if (!TryHittable(target.ShortPrefabName, KindOf(dispenser), out rule)) return null;
             }
-            else if (target is BaseCorpse corpse && _corpseRule != null)
+            else if (target is BaseCorpse corpse)
             {
                 dispenser = corpse.GetComponent<ResourceDispenser>();
-                kind = CorpseKind;
                 maxHealth = corpse.MaxHealth();
+                rule = CorpseRule(corpse);
             }
             else return null;
 
             if (dispenser == null) return null;
-
-            Rule rule;
-            if (kind == CorpseKind) rule = _corpseRule;
-            else if (!TryHittable(target.ShortPrefabName, kind, out rule)) return null;
             if (rule?.Portions == null) return null;
             int hits = Mathf.Max(1, rule.Swings);
 
@@ -796,10 +890,10 @@ namespace Oxide.Plugins
         private bool IsManaged(ResourceDispenser dispenser)
         {
             if (dispenser == null) return false;
-            if (dispenser.gatherType == ResourceDispenser.GatherType.Flesh)
-                return _corpseRule != null;
+            var owner = dispenser.GetComponent<BaseEntity>();
+            if (owner is BaseCorpse) return CorpseRule(owner) != null;
             Rule rule;
-            return TryHittable(dispenser.GetComponent<BaseEntity>()?.ShortPrefabName, KindOf(dispenser), out rule);
+            return TryHittable(owner?.ShortPrefabName, KindOf(dispenser), out rule);
         }
 
         // Where the HP has to sit after this hit for the client to show the right break stage.
@@ -1050,14 +1144,17 @@ namespace Oxide.Plugins
             {
                 case 0: return _config.Hittable.Keys.ToList();
                 case 1: return _config.Collectible.Keys.ToList();
-                case 2: return new List<string> { "corpses" };
+                case 2: return new List<string> { CorpseHumans, CorpseAnimals };
                 default: return new List<string> { "barrels" };
             }
         }
 
+        private const string CorpseHumans = "humans";
+        private const string CorpseAnimals = "animals";
+
         private static string TitleOf(int tab, string key)
         {
-            if (tab == 2) return "Corpses";
+            if (tab == 2) return key == CorpseAnimals ? "Animals" : "Players and NPCs";
             if (tab == 3) return "Plain barrels";
             return key;
         }
@@ -1091,10 +1188,13 @@ namespace Oxide.Plugins
                 }
                 case 2:
                 {
-                    var e = _config.Corpses;
+                    HittableEntry e;
+                    if (key == CorpseHumans) e = _config.HumanCorpses;
+                    else if (key == CorpseAnimals) e = _config.AnimalCorpses;
+                    else return null;
                     return new EditTarget
                     {
-                        Title = "Corpses", Rewards = e.Rewards,
+                        Title = TitleOf(tab, key), Rewards = e.Rewards,
                         Enabled = () => e.Enable, SetEnabled = v => e.Enable = v,
                         Hits = () => e.Hits, SetHits = v => e.Hits = v,
                         Pay = () => ModeOf(e.Mode), SetPay = v => e.Mode = ModeName(v)
