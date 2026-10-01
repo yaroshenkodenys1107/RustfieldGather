@@ -8,8 +8,8 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("RustfieldGather", "Rustfield", "1.2.0")]
-    [Description("Reworked gathering: instant / per hit / total payouts, hits laid over the break stages, instant barrels.")]
+    [Info("RustfieldGather", "Rustfield", "1.4.0")]
+    [Description("Reworked gathering: instant / per hit / total payouts, hits laid over the break stages, instant barrels and road signs.")]
     public class RustfieldGather : RustPlugin
     {
         #region Configuration
@@ -138,44 +138,44 @@ namespace Oxide.Plugins
             {
                 Hittable = new Dictionary<string, HittableEntry>
                 {
-                    ["stone-nodes"] = Node(4, R("stones", 10000)),
-                    ["metal-nodes"] = Node(4, R("metal.fragments", 5000), R("metal.refined", 200)),
-                    ["sulfur-nodes"] = Node(4, R("gunpowder", 1500), R("sulfur", 500)),
-                    ["hqm-nodes"] = Node(4, R("metal.refined", 800), R("metal.fragments", 5000)),
-                    ["trees"] = Node(5, R("wood", 10000)),
-                    ["dead-logs"] = Node(3, R("wood", 7500)),
-                    ["driftwood"] = Node(3, R("wood", 7500)),
-                    ["wood-pile"] = Node(3, R("wood", 7500)),
-                    ["cactus"] = Node(1, R("cloth", 1000), R("largemedkit", 25))
+                    ["stone-nodes"] = Node(5, R("stones", 8000)),
+                    ["metal-nodes"] = Node(5, R("metal.ore", 5000), R("hq.metal.ore", 50)),
+                    ["sulfur-nodes"] = Node(5, R("sulfur.ore", 3000)),
+                    ["hqm-nodes"] = Node(5, R("hq.metal.ore", 350), R("metal.fragments", 2000)),
+                    ["trees"] = Node(8, R("wood", 8000)),
+                    ["dead-logs"] = Node(6, R("wood", 6000)),
+                    ["driftwood"] = Node(6, R("wood", 6000)),
+                    ["wood-pile"] = Node(3, R("wood", 6000)),
+                    ["cactus"] = Node(5, R("cloth", 250), R("largemedkit", 5))
                 },
                 Collectible = new Dictionary<string, CollectibleEntry>
                 {
-                    ["hemp-collectable"] = Pick(R("lowgradefuel", 250), R("cloth", 500)),
-                    ["wood-collectable"] = Pick(R("wood", 15000)),
-                    ["stone-collectable"] = Pick(R("stones", 5000)),
-                    ["metal-collectable"] = Pick(R("metal.fragments", 3000)),
-                    ["sulfur-collectable"] = Pick(R("sulfur", 500), R("gunpowder", 1500)),
-                    ["hqm-collectable"] = Pick(R("metal.refined", 150)),
-                    ["mushrooms"] = Pick(R("mushroom", 25)),
-                    ["diesel_collectable"] = Pick(R("diesel_barrel", 1), R("lowgradefuel", 10000)),
-                    ["coconut-spawn"] = Pick(R("coconut", 25)),
-                    ["corn-collectable"] = Pick(R("corn", 25)),
-                    ["potato-collectable"] = Pick(R("potato", 25)),
-                    ["pumpkin-collectable"] = Pick(R("pumpkin", 25)),
-                    ["wheat-collectable"] = Pick(R("wheat", 25)),
-                    ["sunflower-collectable"] = Pick(R("sunflower", 25)),
-                    ["orchid-collectable"] = Pick(R("orchid", 25)),
-                    ["rose-collectable"] = Pick(R("rose", 25)),
-                    ["berry-black-collectable"] = Pick(R("black.berry", 25)),
-                    ["berry-blue-collectable"] = Pick(R("blue.berry", 25)),
-                    ["berry-green-collectable"] = Pick(R("green.berry", 25)),
-                    ["berry-red-collectable"] = Pick(R("red.berry", 25)),
-                    ["berry-white-collectable"] = Pick(R("white.berry", 25)),
-                    ["berry-yellow-collectable"] = Pick(R("yellow.berry", 25)),
-                    ["halloween-bone-collectable"] = Pick(R("bone.fragments", 1000)),
-                    ["halloween-metal-collectable"] = Pick(R("metal.ore", 2500)),
-                    ["halloween-stone-collectable"] = Pick(R("stones", 5000)),
-                    ["halloween-sulfur-collectible"] = Pick(R("sulfur", 500), R("gunpowder", 1500)),
+                    ["hemp-collectable"] = Pick(R("lowgradefuel", 50), R("cloth", 150)),
+                    ["wood-collectable"] = Pick(R("wood", 2000)),
+                    ["stone-collectable"] = Pick(R("stones", 2000)),
+                    ["metal-collectable"] = Pick(R("metal.ore", 1000)),
+                    ["sulfur-collectable"] = Pick(R("sulfur.ore", 750)),
+                    ["hqm-collectable"] = Pick(R("hq.metal.ore", 50)),
+                    ["mushrooms"] = Pick(R("mushroom", 10)),
+                    ["diesel_collectable"] = Pick(R("diesel_barrel", 1), R("lowgradefuel", 500)),
+                    ["coconut-spawn"] = Pick(R("coconut", 10)),
+                    ["corn-collectable"] = Pick(R("corn", 10)),
+                    ["potato-collectable"] = Pick(R("potato", 10)),
+                    ["pumpkin-collectable"] = Pick(R("pumpkin", 10)),
+                    ["wheat-collectable"] = Pick(R("wheat", 10)),
+                    ["sunflower-collectable"] = Pick(R("sunflower", 10)),
+                    ["orchid-collectable"] = Pick(R("orchid", 10)),
+                    ["rose-collectable"] = Pick(R("rose", 10)),
+                    ["berry-black-collectable"] = Pick(R("black.berry", 10)),
+                    ["berry-blue-collectable"] = Pick(R("blue.berry", 10)),
+                    ["berry-green-collectable"] = Pick(R("green.berry", 10)),
+                    ["berry-red-collectable"] = Pick(R("red.berry", 10)),
+                    ["berry-white-collectable"] = Pick(R("white.berry", 10)),
+                    ["berry-yellow-collectable"] = Pick(R("yellow.berry", 10)),
+                    ["halloween-bone-collectable"] = Pick(R("bone.fragments", 500)),
+                    ["halloween-metal-collectable"] = Pick(R("metal.ore", 2000)),
+                    ["halloween-stone-collectable"] = Pick(R("stones", 2000)),
+                    ["halloween-sulfur-collectible"] = Pick(R("sulfur.ore", 750)),
                     ["halloween-wood-collectable"] = Pick(R("wood", 10000))
                 },
                 HumanCorpses = DefaultCorpse(),
@@ -339,9 +339,13 @@ namespace Oxide.Plugins
         };
 
         // Barrels that break straight into the inventory. The diesel one is not here: it has its own.
+        // Lootable road signs along the roads are the same kind of container and share the rule;
+        // the "...static" signs are plain decor and never hold loot.
         private static readonly string[] BarrelPrefabs =
         {
-            "loot_barrel_1", "loot_barrel_2", "loot-barrel-1", "loot-barrel-2", "oil_barrel"
+            "loot_barrel_1", "loot_barrel_2", "loot-barrel-1", "loot-barrel-2", "oil_barrel",
+            "roadsign1", "roadsign2", "roadsign3", "roadsign4", "roadsign5",
+            "roadsign6", "roadsign7", "roadsign8", "roadsign9"
         };
 
 
@@ -557,7 +561,8 @@ namespace Oxide.Plugins
                     var kind = KindOf(res.GetComponent<ResourceDispenser>());
                     if (kind != null) { kinds.TryGetValue(kind, out var k); kinds[kind] = k + 1; }
                 }
-                else if (ent is LootContainer && name.IndexOf("barrel", StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (ent is LootContainer && (name.IndexOf("barrel", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                                  name.StartsWith("roadsign", StringComparison.OrdinalIgnoreCase)))
                 {
                     barrels.TryGetValue(name, out var n); barrels[name] = n + 1;
                 }
@@ -565,7 +570,7 @@ namespace Oxide.Plugins
 
             Puts("===== RustfieldGather: audit =====");
             Puts($"On map: {nodes.Values.Sum()} nodes ({nodes.Count} prefabs), {collect.Values.Sum()} collectible " +
-                 $"({collect.Count} prefabs), {barrels.Values.Sum()} barrels ({barrels.Count} prefabs).");
+                 $"({collect.Count} prefabs), {barrels.Values.Sum()} barrels and road signs ({barrels.Count} prefabs).");
 
             // 1. Duplicates inside the group table
             var owner = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -628,10 +633,10 @@ namespace Oxide.Plugins
 
             // 5. Barrels
             var missBarrel = barrels.Keys.Where(b => !_barrelPrefabs.Contains(b)).ToList();
-            Puts($"  Barrels on map: {string.Join(", ", barrels.Select(k => k.Key + " x" + k.Value).ToArray())}");
+            Puts($"  Barrels and road signs on map: {string.Join(", ", barrels.Select(k => k.Key + " x" + k.Value).ToArray())}");
             Puts(missBarrel.Count == 0
-                ? "  Every barrel on the map is covered by a rule."
-                : $"  Barrels with no rule: {string.Join(", ", missBarrel.ToArray())}");
+                ? "  Every barrel and road sign on the map is covered by a rule."
+                : $"  Barrels / road signs with no rule: {string.Join(", ", missBarrel.ToArray())}");
 
             // 6. Rewards
             int bad = 0;
@@ -832,6 +837,17 @@ namespace Oxide.Plugins
             ulong id = target.net?.ID.Value ?? 0UL;
             if (id == 0UL) return null;
 
+            // The finishing bonus has to be switched off on the object itself, not on the hook.
+            // Carbon's OnDispenserBonus patch only SWAPS the bonus item for whatever the hook
+            // returns - it never cancels - so the 'return true' further down is read as "not an
+            // Item" and quietly ignored, and the node hands the bonus out anyway. Vanilla gates
+            // the bonus on this field instead: it is skipped unless the swing's destroy fraction
+            // is below it, so zero turns it off for good on everything we pay out ourselves.
+            // Without this a node whose own resources run dry before its configured last hit
+            // (a strong tool empties a stone node in four or five swings) pays the whole
+            // configured total PLUS the vanilla bonus on top.
+            dispenser.maxDestroyFractionForFinishBonus = 0f;
+
             _hitsDone.TryGetValue(id, out var done);
             done++;
             _hitsDone[id] = done;
@@ -839,7 +855,8 @@ namespace Oxide.Plugins
             foreach (var portion in rule.Portions)
             {
                 int amount = AmountForHit(rule, portion.Amount, done);
-                if (amount > 0) Give(player, portion.Def, amount);
+                if (amount <= 0) continue;
+                Give(player, portion.Def, amount + TeaBonus(player, dispenser.gatherType, amount));
             }
 
             // Vanilla damage now lands on the inflated HP pool and cannot kill the node, and on the
@@ -884,6 +901,8 @@ namespace Oxide.Plugins
         private object OnDispenserGather(ResourceDispenser dispenser, BaseEntity entity, Item item)
             => IsManaged(dispenser) ? (object)true : null;
 
+        // Kept for Oxide, where a non-null return does cancel. Under Carbon this hook cannot
+        // block anything (see OnMeleeAttack), so the bonus is disabled on the dispenser instead.
         private object OnDispenserBonus(ResourceDispenser dispenser, BasePlayer player, Item item)
             => IsManaged(dispenser) ? (object)true : null;
 
@@ -920,31 +939,29 @@ namespace Oxide.Plugins
             return 1f - (float)hit / hits;
         }
 
-        // The hits are laid over the object's own stages, weighted towards the FIRST ones. The
-        // last entry in the stage table stands for the break itself, every entry before it is a
-        // visible step. More hits than stages and the extra swings pile onto the early stages
-        // (nine hits over four steps is 3-2-2-2); fewer hits than stages and it is the late
-        // stages that are skipped (three hits: stage one, stage two, break).
+        // The hits are laid over the object's own stages, weighted towards the FIRST ones.
+        // Every entry of the stage table is a look the node wears, the first of them being the
+        // untouched one it is standing in before anybody swings - so a table of N entries is N
+        // looks to live through, and the swings are cut into N shares with the remainder going
+        // to the earliest. A share's LAST swing is the one that moves the node on to the next
+        // look; the swings before it leave it exactly where it is. Over four stages that reads
+        // as four hits 1-1-1-1, five 2-1-1-1, six 2-2-1-1: the extra swings are absorbed while
+        // the rock still looks whole, and the last look always gets the swing that breaks it.
+        // Fewer hits than stages and it is the late looks that never come up.
         private static int StageForHit(int hit, int hits, int stages)
         {
-            int steps = Mathf.Max(2, stages);
-            int step;
+            int looks = Mathf.Max(1, stages);
+            int each = hits / looks, extra = hits % looks, cumulative = 0, stage = 0;
 
-            if (hits >= steps)
+            for (int i = 1; i <= looks; i++)
             {
-                int each = hits / steps, extra = hits % steps, cumulative = 0;
-                step = steps;
-                for (int i = 1; i <= steps; i++)
-                {
-                    cumulative += each + (i <= extra ? 1 : 0);
-                    if (hit <= cumulative) { step = i; break; }
-                }
+                cumulative += each + (i <= extra ? 1 : 0);
+                if (cumulative <= hit) stage = i;
             }
-            else step = hit < hits ? hit : steps;
 
-            // The step that stands for the break holds the last visible stage: the node is only
-            // destroyed on the final swing, and until then it has to look like something.
-            return Mathf.Clamp(step, 1, steps - 1);
+            // The share that carries the killing swing would point one past the table: the node
+            // is gone by then, so it is held on the most broken look instead.
+            return Mathf.Clamp(stage, 0, looks - 1);
         }
 
         // Read once per prefab off its StagedDestructionEntityInfo. A prefab with no stage table
@@ -1048,8 +1065,20 @@ namespace Oxide.Plugins
             List<Portion> portions;
             if (!_collectiblePortions.TryGetValue(collectible.ShortPrefabName, out portions)) return null;
 
+            // The collectible tea is not a multiplier but a chance to take the pickup twice over,
+            // and vanilla rolls it ONCE for the whole bush: hemp never comes out doubled on the
+            // cloth and single on the fuel.
+            bool doubled = false;
+            var modifiers = player.modifiers;
+            if (modifiers != null)
+            {
+                float chance = modifiers.GetValue(Modifier.ModifierType.Collectible_DoubleYield, 0f);
+                doubled = chance != 0f && UnityEngine.Random.value < chance;
+            }
+
             foreach (var portion in portions)
-                Give(player, portion.Def, portion.Amount, BaseEntity.GiveItemReason.PickedUp);
+                Give(player, portion.Def, doubled ? portion.Amount * 2 : portion.Amount,
+                    BaseEntity.GiveItemReason.PickedUp);
 
             var effect = collectible.pickupEffect;
             if (effect != null && effect.isValid)
@@ -1155,7 +1184,7 @@ namespace Oxide.Plugins
         private static string TitleOf(int tab, string key)
         {
             if (tab == 2) return key == CorpseAnimals ? "Animals" : "Players and NPCs";
-            if (tab == 3) return "Plain barrels";
+            if (tab == 3) return "Barrels and road signs";
             return key;
         }
 
@@ -1205,7 +1234,7 @@ namespace Oxide.Plugins
                     var b = _config.Barrels;
                     return new EditTarget
                     {
-                        Title = "Plain barrels",
+                        Title = TitleOf(tab, key),
                         Enabled = () => b.Enable, SetEnabled = v => b.Enable = v,
                         Mode = () => b.Mode, SetMode = v => b.Mode = v
                     };
@@ -1781,7 +1810,7 @@ namespace Oxide.Plugins
             string note = null;
             if (!has) note = "Pick a section on the left.";
             else if (rewards == null)
-                note = "Barrel contents pour into the inventory as-is - there is nothing to override.";
+                note = "Barrel and road sign contents pour into the inventory as-is - there is nothing to override.";
             Txt(c, build, RootUi, "rfg.note", note ?? string.Empty,
                 note != null ? 258 : Hidden, note != null && !has ? 78 : 150, 570, 24, 12, ColDim);
 
@@ -1840,6 +1869,36 @@ namespace Oxide.Plugins
             if (hit < 1 || hit > hits) return 0;
             long total = amount;
             return (int)(total * hit / hits - total * (hit - 1) / hits);
+        }
+
+        // Gathering teas live in ResourceDispenser.CalculateGatherBonus, which our payout never
+        // reaches - so the same sum is done here, per swing and on that swing's own share. The
+        // tea is picked by the object's gather type, not by the item, so a node that is paying
+        // out something exotic still answers to the tea for its own kind. The leftover fraction
+        // is parked in the player's modifier variable exactly where the game parks it, so the
+        // half item one swing could not hand over is carried into the next instead of being
+        // rounded away.
+        private static int TeaBonus(BasePlayer player, ResourceDispenser.GatherType type, int amount)
+        {
+            var modifiers = player?.modifiers;
+            if (modifiers == null || amount <= 0) return 0;
+
+            Modifier.ModifierType yield;
+            switch (type)
+            {
+                case ResourceDispenser.GatherType.Tree: yield = Modifier.ModifierType.Wood_Yield; break;
+                case ResourceDispenser.GatherType.Ore: yield = Modifier.ModifierType.Ore_Yield; break;
+                case ResourceDispenser.GatherType.Flesh: yield = Modifier.ModifierType.Harvesting; break;
+                default: return 0;
+            }
+
+            float scale = 1f + modifiers.GetValue(yield, 0f);
+            if (scale <= 1f) return 0;
+
+            float carried = modifiers.GetVariableValue(yield, 0f) + Mathf.Max(amount * scale - amount, 0f);
+            int bonus = carried >= 1f ? (int)carried : 0;
+            modifiers.SetVariableValue(yield, carried - bonus);
+            return bonus;
         }
 
         private void Give(BasePlayer player, ItemDefinition def, int amount,
